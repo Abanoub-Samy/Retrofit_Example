@@ -12,9 +12,8 @@ public class Model {
     @SerializedName("body")
     String body ;
 
-    public Model(int userId, int id, String title, String body) {
+    public Model(int userId,  String title, String body) {
         this.userId = userId;
-        this.id = id;
         this.title = title;
         this.body = body;
     }

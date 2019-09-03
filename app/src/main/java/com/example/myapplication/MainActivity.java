@@ -17,6 +17,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
+    Retrofit retrofit ;
     JsonApi jsonApi ;
     TextView textView ;
 
@@ -24,16 +25,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        textView = findViewById(R.id.textView);
+
+        retrofit = new Retrofit.Builder().baseUrl("https://jsonplaceholder.typicode.com/").
+                addConverterFactory(GsonConverterFactory.create()).build();
+        jsonApi = retrofit.create(JsonApi.class);
+        createpost();
+
+    }
+    private void getpost(){
         Map<String,String> map = new HashMap<>();
         map.put("userId","3");
         map.put("_sort","id");
         map.put("_order","desc");
 
-        textView = findViewById(R.id.textView);
-
-        Retrofit retrofit = new Retrofit.Builder().baseUrl("https://jsonplaceholder.typicode.com/").
-                addConverterFactory(GsonConverterFactory.create()).build();
-        jsonApi = retrofit.create(JsonApi.class);
         Call<List<Model>> call = jsonApi.getUserId(map);
         call.enqueue(new Callback<List<Model>>() {
             @Override
@@ -58,6 +65,45 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<List<Model>> call, Throwable t) {
                 Toast.makeText(MainActivity.this, "some thing wrong", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+
+
+    private void createpost(){
+
+        Map<String, String> fields = new HashMap<>();
+        fields.put("userId", "25");
+        fields.put("title", "New Title");
+
+        Model model = new Model(1,"abanoub","samy"); // id will generate auto
+        Call<Model> call=jsonApi.createPosts(model);
+        call.enqueue(new Callback<Model>() {
+            @Override
+            public void onResponse(Call<Model> call, Response<Model> response) {
+                if(!response.isSuccessful()){
+                    textView.setText("Code : " + response.code());
+                    return;
+                }
+               Model body = response.body();
+
+                    String content = "";
+                    content += "CODE : " + response.code() + "\n"; //code should be 201
+                    content += "ID: " + body.getId() + "\n";
+                    content += "User ID: " + body.getUserId() + "\n";
+                    content += "Title: " + body.getTitle() + "\n";
+                    content += "Text: " + body.getBody() + "\n\n";
+
+                    textView.append(content);
+
+
+            }
+
+            @Override
+            public void onFailure(Call<Model> call, Throwable t) {
+                Toast.makeText(MainActivity.this, " some thing wrong", Toast.LENGTH_SHORT).show();
             }
         });
     }
